@@ -5,32 +5,32 @@ const Self = @This();
 
 const Rtype = struct {
     rd: usize,
-    funct3: u32,
+    funct3: u3,
     rs1: usize,
     rs2: usize,
-    funct7: u32,
+    funct7: u7,
 
     pub fn init(inst: u32) Rtype {
         return Rtype {
             .rd = ((inst >> 7) & 0x1f),
-            .funct3 = ((inst >> 12) & 0x7),
+            .funct3 = @intCast(u3, ((inst >> 12) & 0x7)),
             .rs1 = ((inst >> 15) & 0x1f),
             .rs2 = ((inst >> 20) & 0x1f),
-            .funct7 = ((inst >> 25) & 0x7f),
+            .funct7 = @intCast(u7, ((inst >> 25) & 0x7f)),
         };
     }
 };
 
 const Itype = struct {
     rd: usize,
-    funct3: u32,
+    funct3: u3,
     rs1: usize,
     imm: i32,
 
     pub fn init(inst: u32) Itype {
         return Itype {
             .rd = ((inst >> 7) & 0x1f),
-            .funct3 = ((inst >> 12) & 0x7),
+            .funct3 = @intCast(u3, ((inst >> 12) & 0x7)),
             .rs1 = ((inst >> 15) & 0x1f),
             .imm = @truncate(i32, @intCast(i64, @bitCast(i32, inst)) >> 20),
         };
