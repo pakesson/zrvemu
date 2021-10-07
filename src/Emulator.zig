@@ -229,7 +229,10 @@ pub fn run(self: *Self) void {
                 std.log.err("Could not decode instruction", .{});
                 return;
             },
-            else => return,
+            error.Unsupported => {
+                std.log.err("Unsupported instruction", .{});
+                return;
+            }
         };
         self.pc += 4;
         self.execute_instruction(decoded_inst);
