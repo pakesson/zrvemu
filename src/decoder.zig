@@ -20,11 +20,11 @@ pub fn decode_instruction(inst: u32) !Instruction {
                 // LOAD
                 const itype = Itype.init(inst);
                 switch (itype.funct3 & 0b111) {
-                    0b000 => return Instruction{.lb = itype},
-                    0b001 => return Instruction{.lh = itype},
-                    0b010 => return Instruction{.lw = itype},
-                    0b100 => return Instruction{.lbu = itype},
-                    0b101 => return Instruction{.lhu = itype},
+                    0b000 => return Instruction{ .lb = itype },
+                    0b001 => return Instruction{ .lh = itype },
+                    0b010 => return Instruction{ .lw = itype },
+                    0b100 => return Instruction{ .lbu = itype },
+                    0b101 => return Instruction{ .lhu = itype },
                     else => return error.DecoderError,
                 }
             },
@@ -40,16 +40,16 @@ pub fn decode_instruction(inst: u32) !Instruction {
                 // OP-IMM
                 const itype = Itype.init(inst);
                 switch (itype.funct3) {
-                    0b000 => return Instruction{.addi = itype},
-                    0b010 => return Instruction{.slti = itype},
-                    0b011 => return Instruction{.sltiu = itype},
-                    0b100 => return Instruction{.xori = itype},
-                    0b110 => return Instruction{.ori = itype},
-                    0b111 => return Instruction{.andi = itype},
-                    0b001 => return Instruction{.slli = itype},
+                    0b000 => return Instruction{ .addi = itype },
+                    0b010 => return Instruction{ .slti = itype },
+                    0b011 => return Instruction{ .sltiu = itype },
+                    0b100 => return Instruction{ .xori = itype },
+                    0b110 => return Instruction{ .ori = itype },
+                    0b111 => return Instruction{ .andi = itype },
+                    0b001 => return Instruction{ .slli = itype },
                     0b101 => switch ((itype.imm >> 10) & 0b1) {
-                        0 => return Instruction{.srli = itype},
-                        1 => return Instruction{.srai = itype},
+                        0 => return Instruction{ .srli = itype },
+                        1 => return Instruction{ .srai = itype },
                         else => unreachable,
                     },
                 }
@@ -57,7 +57,7 @@ pub fn decode_instruction(inst: u32) !Instruction {
             0b00101 => {
                 // AUIPC
                 const utype = Utype.init(inst);
-                return Instruction{.auipc = utype};
+                return Instruction{ .auipc = utype };
             },
             0b00110 => {
                 // OP-IMM-32
@@ -67,9 +67,9 @@ pub fn decode_instruction(inst: u32) !Instruction {
                 // STORE
                 const stype = Stype.init(inst);
                 switch (stype.funct3 & 0b111) {
-                    0b000 => return Instruction{.sb = stype},
-                    0b001 => return Instruction{.sh = stype},
-                    0b010 => return Instruction{.sw = stype},
+                    0b000 => return Instruction{ .sb = stype },
+                    0b001 => return Instruction{ .sh = stype },
+                    0b010 => return Instruction{ .sw = stype },
                     else => return error.DecoderError,
                 }
             },
@@ -86,27 +86,27 @@ pub fn decode_instruction(inst: u32) !Instruction {
                 const rtype = Rtype.init(inst);
                 switch (rtype.funct3) {
                     0b000 => switch ((rtype.funct7 >> 6) & 0b1) {
-                        0 => return Instruction{.add = rtype},
-                        1 => return Instruction{.sub = rtype},
+                        0 => return Instruction{ .add = rtype },
+                        1 => return Instruction{ .sub = rtype },
                         else => unreachable,
                     },
-                    0b001 => return Instruction{.sll = rtype},
-                    0b010 => return Instruction{.slt = rtype},
-                    0b011 => return Instruction{.sltu = rtype},
-                    0b100 => return Instruction{.xor = rtype},
+                    0b001 => return Instruction{ .sll = rtype },
+                    0b010 => return Instruction{ .slt = rtype },
+                    0b011 => return Instruction{ .sltu = rtype },
+                    0b100 => return Instruction{ .xor = rtype },
                     0b101 => switch ((rtype.funct7 >> 6) & 0b1) {
-                        0 => return Instruction{.srl = rtype},
-                        1 => return Instruction{.sra = rtype},
+                        0 => return Instruction{ .srl = rtype },
+                        1 => return Instruction{ .sra = rtype },
                         else => unreachable,
                     },
-                    0b110 => return Instruction{.or_ = rtype},
-                    0b111 => return Instruction{.and_ = rtype},
+                    0b110 => return Instruction{ .or_ = rtype },
+                    0b111 => return Instruction{ .and_ = rtype },
                 }
             },
             0b01101 => {
                 // LUI
                 const utype = Utype.init(inst);
-                return Instruction{.lui = utype};
+                return Instruction{ .lui = utype };
             },
             0b01110 => {
                 // OP-32
@@ -136,12 +136,12 @@ pub fn decode_instruction(inst: u32) !Instruction {
                 // BRANCH
                 const btype = Btype.init(inst);
                 switch (btype.funct3) {
-                    0b000 => return Instruction{.beq = btype},
-                    0b001 => return Instruction{.bne = btype},
-                    0b100 => return Instruction{.blt = btype},
-                    0b101 => return Instruction{.bge = btype},
-                    0b110 => return Instruction{.bltu = btype},
-                    0b111 => return Instruction{.bgeu = btype},
+                    0b000 => return Instruction{ .beq = btype },
+                    0b001 => return Instruction{ .bne = btype },
+                    0b100 => return Instruction{ .blt = btype },
+                    0b101 => return Instruction{ .bge = btype },
+                    0b110 => return Instruction{ .bltu = btype },
+                    0b111 => return Instruction{ .bgeu = btype },
                     else => return error.Unsupported,
                 }
             },
@@ -150,7 +150,7 @@ pub fn decode_instruction(inst: u32) !Instruction {
                 switch (itype.funct3) {
                     0b000 => {
                         // JALR
-                        return Instruction{.jalr = itype};
+                        return Instruction{ .jalr = itype };
                     },
                     else => return error.Unsupported,
                 }
@@ -158,7 +158,7 @@ pub fn decode_instruction(inst: u32) !Instruction {
             0b11011 => {
                 // JAL
                 var jtype = Jtype.init(inst);
-                return Instruction{.jal = jtype};
+                return Instruction{ .jal = jtype };
             },
             0b11100 => {
                 // SYSTEM
