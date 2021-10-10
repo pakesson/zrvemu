@@ -232,9 +232,57 @@ pub fn run(self: *Self) void {
             error.Unsupported => {
                 std.log.err("Unsupported instruction", .{});
                 return;
-            }
+            },
         };
         self.pc += 4;
         self.execute_instruction(decoded_inst);
     }
+}
+
+test "execute add addi" {
+    var memory = ArrayList(u8).init(std.testing.allocator);
+    defer memory.deinit();
+    try memory.appendSlice(&[_]u8{
+        0x13, 0x05, 0x60, 0x00, // addi a0,x0,6 (li a0,6)
+        0x93, 0x05, 0x40, 0x00, // addi a1,x0,4 (li a1,4)
+        0x33, 0x05, 0xb5, 0x00, // add a0,a0,a1
+    });
+
+    var emulator = Self.init(memory);
+    emulator.run();
+
+    try std.testing.expectEqual(emulator.getreg(10), 0x0a);
+}
+
+test "execute auipc lw" {
+    var memory = ArrayList(u8).init(std.testing.allocator);
+    defer memory.deinit();
+    try memory.appendSlice(&[_]u8{
+        0x17, 0x05, 0x00, 0x00, // auipc a0,0x0
+        0x03, 0x25, 0x05, 0x00, // lw    a0,0(a0)
+    });
+
+    var emulator = Self.init(memory);
+    emulator.run();
+
+    try std.testing.expectEqual(emulator.getreg(10), 0x00000517);
+}
+
+test "execute andi li ori xori" {
+    var memory = ArrayList(u8).init(std.testing.allocator);
+    defer memory.deinit();
+    try memory.appendSlice(&[_]u8{
+        0x13, 0x05, 0x50, 0x00, // li   a0,5
+        0x93, 0x75, 0x45, 0x00, // andi a1,a0,4
+        0x13, 0x66, 0x25, 0x00, // ori  a2,a0,2
+        0x93, 0x46, 0xa5, 0x00, // xori a3,a0,10
+    });
+
+    var emulator = Self.init(memory);
+    emulator.run();
+
+    try std.testing.expectEqual(emulator.getreg(10), 0x00000005);
+    try std.testing.expectEqual(emulator.getreg(11), 0x00000004);
+    try std.testing.expectEqual(emulator.getreg(12), 0x00000007);
+    try std.testing.expectEqual(emulator.getreg(13), 0x0000000f);
 }

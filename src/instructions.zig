@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const Rtype = struct {
     rd: usize,
     funct3: u3,
@@ -133,3 +135,29 @@ pub const Instruction = union(enum) {
     xor: Rtype,
     xori: Itype,
 };
+
+test "decode itype" {
+    const inst = Itype.init(0x80152583); // lw	a1,-2047(a0)
+    try std.testing.expectEqual(inst.rs1, 10); // base
+    try std.testing.expectEqual(inst.rd, 11); // dst
+    try std.testing.expectEqual(inst.funct3, 0b010); // width
+    try std.testing.expectEqual(inst.imm, -2047); // offset
+}
+
+test "decode stype" {
+    {
+        const inst = Stype.init(0x80b520a3); // sw	a1,-2047(a0)
+        try std.testing.expectEqual(inst.rs1, 10); // base
+        try std.testing.expectEqual(inst.rs2, 11); // src
+        try std.testing.expectEqual(inst.funct3, 0b010); // width
+        try std.testing.expectEqual(inst.imm, -2047); // offset
+    }
+
+    {
+        const inst = Stype.init(0x7eb52fa3); // sw	a1,2047(a0)
+        try std.testing.expectEqual(inst.rs1, 10); // base
+        try std.testing.expectEqual(inst.rs2, 11); // src
+        try std.testing.expectEqual(inst.funct3, 0b010); // width
+        try std.testing.expectEqual(inst.imm, 2047); // offset
+    }
+}

@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const instructions = @import("instructions.zig");
 const Instruction = instructions.Instruction;
 const Itype = instructions.Itype;
@@ -168,4 +170,10 @@ pub fn decode_instruction(inst: u32) !Instruction {
         },
         else => return error.Unsupported,
     }
+}
+
+test "decode andi ori xori" {
+    try std.testing.expectEqual(decode_instruction(0x00457593), Instruction{ .andi = Itype.init(0x00457593) });
+    try std.testing.expectEqual(decode_instruction(0x00256613), Instruction{ .ori = Itype.init(0x00256613) });
+    try std.testing.expectEqual(decode_instruction(0x00a54693), Instruction{ .xori = Itype.init(0x00a54693) });
 }
