@@ -19,8 +19,6 @@ pub fn init(memory: ArrayList(u8)) Self {
     };
 }
 
-pub fn deinit(self: *Self) void {}
-
 pub fn getreg(self: *const Self, reg: usize) u64 {
     if (reg == 0) {
         return 0;

@@ -6,7 +6,7 @@ const Emulator = @import("Emulator.zig");
 pub fn main() anyerror!void {
     var gpalloc = std.heap.GeneralPurposeAllocator(.{}){};
     defer std.debug.assert(!gpalloc.deinit());
-    const allocator = &gpalloc.allocator;
+    const allocator = gpalloc.allocator();
 
     var memory = ArrayList(u8).init(allocator);
     defer memory.deinit();
