@@ -10,10 +10,10 @@ pub const Rtype = struct {
     pub fn init(inst: u32) Rtype {
         return Rtype{
             .rd = ((inst >> 7) & 0x1f),
-            .funct3 = @intCast(u3, ((inst >> 12) & 0x7)),
+            .funct3 = @as(u3, @intCast(((inst >> 12) & 0x7))),
             .rs1 = ((inst >> 15) & 0x1f),
             .rs2 = ((inst >> 20) & 0x1f),
-            .funct7 = @intCast(u7, ((inst >> 25) & 0x7f)),
+            .funct7 = @as(u7, @intCast(((inst >> 25) & 0x7f))),
         };
     }
 };
@@ -27,9 +27,9 @@ pub const Itype = struct {
     pub fn init(inst: u32) Itype {
         return Itype{
             .rd = ((inst >> 7) & 0x1f),
-            .funct3 = @intCast(u3, ((inst >> 12) & 0x7)),
+            .funct3 = @as(u3, @intCast(((inst >> 12) & 0x7))),
             .rs1 = ((inst >> 15) & 0x1f),
-            .imm = @truncate(i32, @intCast(i64, @bitCast(i32, inst)) >> 20),
+            .imm = @as(i32, @truncate(@as(i64, @intCast(@as(i32, @bitCast(inst)))) >> 20)),
         };
     }
 };
@@ -42,8 +42,8 @@ pub const Stype = struct {
 
     pub fn init(inst: u32) Stype {
         return Stype{
-            .imm = @intCast(i32, (inst >> 7) & 0x1f) | (@bitCast(i32, inst & 0xfe000000) >> 20),
-            .funct3 = @intCast(u3, ((inst >> 12) & 0x7)),
+            .imm = @as(i32, @intCast((inst >> 7) & 0x1f)) | (@as(i32, @bitCast(inst & 0xfe000000)) >> 20),
+            .funct3 = @as(u3, @intCast(((inst >> 12) & 0x7))),
             .rs1 = ((inst >> 15) & 0x1f),
             .rs2 = ((inst >> 20) & 0x1f),
         };
@@ -57,7 +57,7 @@ pub const Utype = struct {
     pub fn init(inst: u32) Utype {
         return Utype{
             .rd = ((inst >> 7) & 0x1f),
-            .imm = @bitCast(i32, inst & 0xfffff000),
+            .imm = @as(i32, @bitCast(inst & 0xfffff000)),
         };
     }
 };
@@ -70,13 +70,13 @@ pub const Btype = struct {
 
     pub fn init(inst: u32) Btype {
         return Btype{
-            .funct3 = @intCast(u3, ((inst >> 12) & 0x7)),
+            .funct3 = @as(u3, @intCast(((inst >> 12) & 0x7))),
             .rs1 = ((inst >> 15) & 0x1f),
             .rs2 = ((inst >> 20) & 0x1f),
-            .imm = @bitCast(i32, (((inst & 0x80000000) >> 19) |
+            .imm = @as(i32, @bitCast((((inst & 0x80000000) >> 19) |
                 ((inst & 0x7e000000) >> 20) |
                 ((inst & 0x00000f00) >> 7) |
-                ((inst & 0x00000080) << 4))),
+                ((inst & 0x00000080) << 4)))),
         };
     }
 };
@@ -88,10 +88,10 @@ pub const Jtype = struct {
     pub fn init(inst: u32) Jtype {
         return Jtype{
             .rd = ((inst >> 7) & 0x1f),
-            .imm = @bitCast(i32, (((inst & 0x80000000) >> 11) |
+            .imm = @as(i32, @bitCast((((inst & 0x80000000) >> 11) |
                 ((inst & 0x7fe00000) >> 20) |
                 ((inst & 0x00100000) >> 9) |
-                (inst & 0x000ff000))),
+                (inst & 0x000ff000)))),
         };
     }
 };
@@ -137,7 +137,7 @@ pub const Instruction = union(enum) {
 };
 
 test "decode itype" {
-    const inst = Itype.init(0x80152583); // lw	a1,-2047(a0)
+    const inst = Itype.init(0x80152583); // lw  a1,-2047(a0)
     try std.testing.expectEqual(inst.rs1, 10); // base
     try std.testing.expectEqual(inst.rd, 11); // dst
     try std.testing.expectEqual(inst.funct3, 0b010); // width
@@ -146,7 +146,7 @@ test "decode itype" {
 
 test "decode stype" {
     {
-        const inst = Stype.init(0x80b520a3); // sw	a1,-2047(a0)
+        const inst = Stype.init(0x80b520a3); // sw  a1,-2047(a0)
         try std.testing.expectEqual(inst.rs1, 10); // base
         try std.testing.expectEqual(inst.rs2, 11); // src
         try std.testing.expectEqual(inst.funct3, 0b010); // width
@@ -154,7 +154,7 @@ test "decode stype" {
     }
 
     {
-        const inst = Stype.init(0x7eb52fa3); // sw	a1,2047(a0)
+        const inst = Stype.init(0x7eb52fa3); // sw  a1,2047(a0)
         try std.testing.expectEqual(inst.rs1, 10); // base
         try std.testing.expectEqual(inst.rs2, 11); // src
         try std.testing.expectEqual(inst.funct3, 0b010); // width

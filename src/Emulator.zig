@@ -34,10 +34,10 @@ pub fn setreg(self: *Self, reg: usize, val: u64) void {
 }
 
 pub fn fetch_instruction(self: *const Self) u32 {
-    return @intCast(u32, self.memory.items[self.pc]) |
-        @intCast(u32, self.memory.items[self.pc + 1]) << 8 |
-        @intCast(u32, self.memory.items[self.pc + 2]) << 16 |
-        @intCast(u32, self.memory.items[self.pc + 3]) << 24;
+    return @as(u32, @intCast(self.memory.items[self.pc])) |
+        @as(u32, @intCast(self.memory.items[self.pc + 1])) << 8 |
+        @as(u32, @intCast(self.memory.items[self.pc + 2])) << 16 |
+        @as(u32, @intCast(self.memory.items[self.pc + 3])) << 24;
 }
 
 pub fn execute_instruction(self: *Self, inst: Instruction) void {
@@ -46,113 +46,113 @@ pub fn execute_instruction(self: *Self, inst: Instruction) void {
             self.setreg(val.rd, self.getreg(val.rs1) +% self.getreg(val.rs2));
         },
         .addi => |*val| {
-            self.setreg(val.rd, self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm)));
+            self.setreg(val.rd, self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm)))));
         },
         .and_ => |*val| {
             self.setreg(val.rd, self.getreg(val.rs1) & self.getreg(val.rs2));
         },
         .andi => |*val| {
-            self.setreg(val.rd, self.getreg(val.rs1) & @bitCast(u64, @intCast(i64, val.imm)));
+            self.setreg(val.rd, self.getreg(val.rs1) & @as(u64, @bitCast(@as(i64, @intCast(val.imm)))));
         },
         .auipc => |*val| {
-            self.setreg(val.rd, (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm)));
+            self.setreg(val.rd, (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm)))));
         },
         .beq => |*val| {
             if (self.getreg(val.rs1) == self.getreg(val.rs2)) {
                 // PC has already been increased
-                self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+                self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             }
         },
         .bge => |*val| {
-            if (@bitCast(i64, self.getreg(val.rs1)) >= @bitCast(i64, self.getreg(val.rs2))) {
+            if (@as(i64, @bitCast(self.getreg(val.rs1))) >= @as(i64, @bitCast(self.getreg(val.rs2)))) {
                 // PC has already been increased
-                self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+                self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             }
         },
         .bgeu => |*val| {
             if (self.getreg(val.rs1) >= self.getreg(val.rs2)) {
                 // PC has already been increased
-                self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+                self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             }
         },
         .blt => |*val| {
-            if (@bitCast(i64, self.getreg(val.rs1)) < @bitCast(i64, self.getreg(val.rs2))) {
+            if (@as(i64, @bitCast(self.getreg(val.rs1))) < @as(i64, @bitCast(self.getreg(val.rs2)))) {
                 // PC has already been increased
-                self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+                self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             }
         },
         .bltu => |*val| {
             if (self.getreg(val.rs1) < self.getreg(val.rs2)) {
                 // PC has already been increased
-                self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+                self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             }
         },
         .bne => |*val| {
             if (self.getreg(val.rs1) != self.getreg(val.rs2)) {
                 // PC has already been increased
-                self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+                self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             }
         },
         .jal => |*val| {
             // TODO: instruction-address-misaligned exception if address is not aligned
             // PC has already been increased
             self.setreg(val.rd, self.pc);
-            self.pc = (self.pc -% 4) +% @bitCast(u64, @intCast(i64, val.imm));
+            self.pc = (self.pc -% 4) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
         },
         .jalr => |*val| {
             // TODO: instruction-address-misaligned exception if address is not aligned
             // PC has already been increased
             self.setreg(val.rd, self.pc);
-            self.pc = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
+            self.pc = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
         },
         .lb => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
-            const value = @bitCast(u64, @intCast(i64, @bitCast(i8, self.memory.items[address])));
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
+            const value = @as(u64, @bitCast(@as(i64, @intCast(@as(i8, @bitCast(self.memory.items[address]))))));
             self.setreg(val.rd, value);
         },
         .lbu => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
-            const value = @intCast(u64, self.memory.items[address]);
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
+            const value = @as(u64, @intCast(self.memory.items[address]));
             self.setreg(val.rd, value);
         },
         .lh => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
-            const value = @bitCast(u64, @intCast(i64, @bitCast(i16, @intCast(u16, self.memory.items[address]) |
-                (@intCast(u16, self.memory.items[address + 1]) << 8))));
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
+            const value = @as(u64, @bitCast(@as(i64, @intCast(@as(i16, @bitCast(@as(u16, @intCast(self.memory.items[address])) |
+                (@as(u16, @intCast(self.memory.items[address + 1])) << 8)))))));
             self.setreg(val.rd, value);
         },
         .lhu => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
-            const value = @intCast(u64, self.memory.items[address]) |
-                (@intCast(u64, self.memory.items[address + 1]) << 8);
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
+            const value = @as(u64, @intCast(self.memory.items[address])) |
+                (@as(u64, @intCast(self.memory.items[address + 1])) << 8);
             self.setreg(val.rd, value);
         },
         .lui => |*val| {
-            self.setreg(val.rd, @bitCast(u64, @intCast(i64, val.imm)));
+            self.setreg(val.rd, @as(u64, @bitCast(@as(i64, @intCast(val.imm)))));
         },
         .lw => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
-            const value = @intCast(u64, self.memory.items[address]) |
-                (@intCast(u64, self.memory.items[address + 1]) << 8) |
-                (@intCast(u64, self.memory.items[address + 2]) << 16) |
-                (@intCast(u64, self.memory.items[address + 3]) << 24);
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
+            const value = @as(u64, @intCast(self.memory.items[address])) |
+                (@as(u64, @intCast(self.memory.items[address + 1])) << 8) |
+                (@as(u64, @intCast(self.memory.items[address + 2])) << 16) |
+                (@as(u64, @intCast(self.memory.items[address + 3])) << 24);
             self.setreg(val.rd, value);
         },
         .or_ => |*val| {
             self.setreg(val.rd, self.getreg(val.rs1) | self.getreg(val.rs2));
         },
         .ori => |*val| {
-            self.setreg(val.rd, self.getreg(val.rs1) | @bitCast(u64, @intCast(i64, val.imm)));
+            self.setreg(val.rd, self.getreg(val.rs1) | @as(u64, @bitCast(@as(i64, @intCast(val.imm)))));
         },
         .sb => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
-            self.memory.items[address] = @truncate(u8, self.getreg(val.rs2));
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
+            self.memory.items[address] = @as(u8, @truncate(self.getreg(val.rs2)));
         },
         .sh => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             const value = self.getreg(val.rs2);
-            self.memory.items[address] = @truncate(u8, value);
-            self.memory.items[address + 1] = @truncate(u8, value >> 8);
+            self.memory.items[address] = @as(u8, @truncate(value));
+            self.memory.items[address + 1] = @as(u8, @truncate(value >> 8));
         },
         .sll => |*val| {
             const shamt = self.getreg(val.rs2) & 0b11111;
@@ -163,24 +163,24 @@ pub fn execute_instruction(self: *Self, inst: Instruction) void {
             self.setreg(val.rd, math.shl(u64, self.getreg(val.rs1), shamt));
         },
         .slt => |*val| {
-            self.setreg(val.rd, @boolToInt(@bitCast(i64, self.getreg(val.rs1)) < @bitCast(i64, self.getreg(val.rs2))));
+            self.setreg(val.rd, @intFromBool(@as(i64, @bitCast(self.getreg(val.rs1))) < @as(i64, @bitCast(self.getreg(val.rs2)))));
         },
         .slti => |*val| {
-            self.setreg(val.rd, @boolToInt(@bitCast(i64, self.getreg(val.rs1)) < @intCast(i64, val.imm)));
+            self.setreg(val.rd, @intFromBool(@as(i64, @bitCast(self.getreg(val.rs1))) < @as(i64, @intCast(val.imm))));
         },
         .sltiu => |*val| {
-            self.setreg(val.rd, @boolToInt(self.getreg(val.rs1) < @bitCast(u64, @intCast(i64, val.imm))));
+            self.setreg(val.rd, @intFromBool(self.getreg(val.rs1) < @as(u64, @bitCast(@as(i64, @intCast(val.imm))))));
         },
         .sltu => |*val| {
-            self.setreg(val.rd, @boolToInt(self.getreg(val.rs1) < self.getreg(val.rs2)));
+            self.setreg(val.rd, @intFromBool(self.getreg(val.rs1) < self.getreg(val.rs2)));
         },
         .sra => |*val| {
             const shamt = self.getreg(val.rs2) & 0b11111;
-            self.setreg(val.rd, @bitCast(u64, math.shr(i64, @bitCast(i64, self.getreg(val.rs1)), shamt)));
+            self.setreg(val.rd, @as(u64, @bitCast(math.shr(i64, @as(i64, @bitCast(self.getreg(val.rs1))), shamt))));
         },
         .srai => |*val| {
             const shamt = val.imm & 0b11111;
-            self.setreg(val.rd, @bitCast(u64, math.shr(i64, @bitCast(i64, self.getreg(val.rs1)), shamt)));
+            self.setreg(val.rd, @as(u64, @bitCast(math.shr(i64, @as(i64, @bitCast(self.getreg(val.rs1))), shamt))));
         },
         .srl => |*val| {
             const shamt = self.getreg(val.rs2) & 0b11111;
@@ -194,24 +194,24 @@ pub fn execute_instruction(self: *Self, inst: Instruction) void {
             self.setreg(val.rd, self.getreg(val.rs1) -% self.getreg(val.rs2));
         },
         .sw => |*val| {
-            const address = self.getreg(val.rs1) +% @bitCast(u64, @intCast(i64, val.imm));
+            const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
             const value = self.getreg(val.rs2);
-            self.memory.items[address] = @truncate(u8, value);
-            self.memory.items[address + 1] = @truncate(u8, value >> 8);
-            self.memory.items[address + 2] = @truncate(u8, value >> 16);
-            self.memory.items[address + 3] = @truncate(u8, value >> 24);
+            self.memory.items[address] = @as(u8, @truncate(value));
+            self.memory.items[address + 1] = @as(u8, @truncate(value >> 8));
+            self.memory.items[address + 2] = @as(u8, @truncate(value >> 16));
+            self.memory.items[address + 3] = @as(u8, @truncate(value >> 24));
         },
         .xor => |*val| {
             self.setreg(val.rd, self.getreg(val.rs1) ^ self.getreg(val.rs2));
         },
         .xori => |*val| {
-            self.setreg(val.rd, self.getreg(val.rs1) ^ @bitCast(u64, @intCast(i64, val.imm)));
+            self.setreg(val.rd, self.getreg(val.rs1) ^ @as(u64, @bitCast(@as(i64, @intCast(val.imm)))));
         },
     }
 }
 
 pub fn print_state(self: *const Self) void {
-    for (self.regs) |reg, index| {
+    for (self.regs, 0..) |reg, index| {
         std.log.info("x{} = {x}", .{ index, reg });
     }
     std.log.info("pc = {}", .{self.pc});
@@ -238,9 +238,9 @@ pub fn run(self: *Self) void {
 }
 
 test "execute add addi" {
-    var memory = ArrayList(u8).init(std.testing.allocator);
-    defer memory.deinit();
-    try memory.appendSlice(&[_]u8{
+    var memory: ArrayList(u8) = .empty;
+    defer memory.deinit(std.testing.allocator);
+    try memory.appendSlice(std.testing.allocator, &[_]u8{
         0x13, 0x05, 0x60, 0x00, // addi a0,x0,6 (li a0,6)
         0x93, 0x05, 0x40, 0x00, // addi a1,x0,4 (li a1,4)
         0x33, 0x05, 0xb5, 0x00, // add a0,a0,a1
@@ -253,9 +253,9 @@ test "execute add addi" {
 }
 
 test "execute auipc lw" {
-    var memory = ArrayList(u8).init(std.testing.allocator);
-    defer memory.deinit();
-    try memory.appendSlice(&[_]u8{
+    var memory: ArrayList(u8) = .empty;
+    defer memory.deinit(std.testing.allocator);
+    try memory.appendSlice(std.testing.allocator, &[_]u8{
         0x17, 0x05, 0x00, 0x00, // auipc a0,0x0
         0x03, 0x25, 0x05, 0x00, // lw    a0,0(a0)
     });
@@ -267,9 +267,9 @@ test "execute auipc lw" {
 }
 
 test "execute andi li ori xori" {
-    var memory = ArrayList(u8).init(std.testing.allocator);
-    defer memory.deinit();
-    try memory.appendSlice(&[_]u8{
+    var memory: ArrayList(u8) = .empty;
+    defer memory.deinit(std.testing.allocator);
+    try memory.appendSlice(std.testing.allocator, &[_]u8{
         0x13, 0x05, 0x50, 0x00, // li   a0,5
         0x93, 0x75, 0x45, 0x00, // andi a1,a0,4
         0x13, 0x66, 0x25, 0x00, // ori  a2,a0,2

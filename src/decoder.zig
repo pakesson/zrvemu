@@ -15,7 +15,7 @@ pub const DecoderError = error{
 };
 
 pub fn decode_instruction(inst: u32) !Instruction {
-    var opcode = inst & 0x7f;
+    const opcode = inst & 0x7f;
     switch (opcode & 0b11) {
         0b11 => switch (opcode >> 2) {
             0b00000 => {
@@ -159,7 +159,7 @@ pub fn decode_instruction(inst: u32) !Instruction {
             },
             0b11011 => {
                 // JAL
-                var jtype = Jtype.init(inst);
+                const jtype = Jtype.init(inst);
                 return Instruction{ .jal = jtype };
             },
             0b11100 => {
