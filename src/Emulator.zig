@@ -107,18 +107,18 @@ pub fn execute_instruction(self: *Self, inst: Instruction) void {
         },
         .lb => |*val| {
             const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
-            const value = @as(u64, @bitCast(@as(i64, @intCast(@as(i8, @bitCast(self.memory.items[address]))))));
+            const value: u64 = @bitCast(@as(i64, @as(i8, @bitCast(self.memory.items[address]))));
             self.setreg(val.rd, value);
         },
         .lbu => |*val| {
             const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
-            const value = @as(u64, @intCast(self.memory.items[address]));
+            const value: u64 = @intCast(self.memory.items[address]);
             self.setreg(val.rd, value);
         },
         .lh => |*val| {
             const address = self.getreg(val.rs1) +% @as(u64, @bitCast(@as(i64, @intCast(val.imm))));
-            const value = @as(u64, @bitCast(@as(i64, @intCast(@as(i16, @bitCast(@as(u16, @intCast(self.memory.items[address])) |
-                (@as(u16, @intCast(self.memory.items[address + 1])) << 8)))))));
+            const value: u64 = @bitCast(@as(i64, @as(i16, @bitCast(@as(u16, self.memory.items[address]) |
+                (@as(u16, self.memory.items[address + 1]) << 8)))));
             self.setreg(val.rd, value);
         },
         .lhu => |*val| {
