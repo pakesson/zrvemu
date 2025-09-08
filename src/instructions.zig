@@ -29,7 +29,7 @@ pub const Itype = struct {
             .rd = ((inst >> 7) & 0x1f),
             .funct3 = @as(u3, @intCast(((inst >> 12) & 0x7))),
             .rs1 = ((inst >> 15) & 0x1f),
-            .imm = @as(i32, @truncate(@as(i64, @intCast(@as(i32, @bitCast(inst)))) >> 20)),
+            .imm = @truncate(@as(i64, @as(i32, @bitCast(inst))) >> 20),
         };
     }
 };
