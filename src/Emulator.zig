@@ -225,6 +225,9 @@ pub fn run(self: *Self) void {
                 return;
             },
         };
+
+        const prev_pc = self.pc;
+
         self.pc += 4;
         self.execute_instruction(decoded_inst) catch |err| switch (err) {
             ExecutionError.AddressOutOfBounds => {
@@ -232,6 +235,11 @@ pub fn run(self: *Self) void {
                 return;
             },
         };
+
+        if (self.pc == prev_pc) {
+            std.log.err("PC did not change, stopping execution to prevent infinite loop", .{});
+            return;
+        }
     }
 }
 
