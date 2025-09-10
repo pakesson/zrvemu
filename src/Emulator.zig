@@ -11,6 +11,10 @@ memory: ArrayList(u8),
 pc: u32,
 regs: [32]u32,
 
+pub const ExecutionError = error{
+    AddressOutOfBounds,
+};
+
 pub fn init(memory: ArrayList(u8)) Self {
     return Self{
         .memory = memory,
@@ -37,7 +41,7 @@ pub fn fetch_instruction(self: *const Self) u32 {
     return std.mem.readInt(u32, self.memory.items[self.pc..][0..4], .little);
 }
 
-pub fn execute_instruction(self: *Self, inst: Instruction) void {
+pub fn execute_instruction(self: *Self, inst: Instruction) !void {
     switch (inst) {
         .add => |*val| {
             self.setreg(val.rd, self.getreg(val.rs1) +% self.getreg(val.rs2));
@@ -187,6 +191,7 @@ pub fn execute_instruction(self: *Self, inst: Instruction) void {
         .sw => |*val| {
             const address = self.getreg(val.rs1) +% @as(u32, @bitCast(val.imm));
             const value = self.getreg(val.rs2);
+            if (address + 4 >= self.memory.items.len) return error.AddressOutOfBounds;
             std.mem.writeInt(u32, self.memory.items[address..][0..4], value, .little);
         },
         .xor => |*val| {
@@ -221,7 +226,12 @@ pub fn run(self: *Self) void {
             },
         };
         self.pc += 4;
-        self.execute_instruction(decoded_inst);
+        self.execute_instruction(decoded_inst) catch |err| switch (err) {
+            ExecutionError.AddressOutOfBounds => {
+                std.log.err("Memory access out of bounds at PC={x:0>8}", .{self.pc});
+                return;
+            },
+        };
     }
 }
 
