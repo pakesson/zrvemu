@@ -88,10 +88,10 @@ pub const Jtype = struct {
     pub fn init(inst: u32) Jtype {
         return Jtype{
             .rd = ((inst >> 7) & 0x1f),
-            .imm = @as(i32, @bitCast((((inst & 0x80000000) >> 11) |
+            .imm = (@as(i32, @bitCast((((inst & 0x80000000) >> 11) |
                 ((inst & 0x7fe00000) >> 20) |
                 ((inst & 0x00100000) >> 9) |
-                (inst & 0x000ff000)))),
+                (inst & 0x000ff000)))) << 11) >> 11,
         };
     }
 };
