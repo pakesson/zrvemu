@@ -16,6 +16,11 @@ pub fn main() anyerror!void {
     });
 
     var emulator = zrvemu.Emulator.init(memory);
+
+    // Set the stack pointer (sp) to the end of memory
+    // TODO: Handle this in Emulator instead
+    emulator.regs[2] = @as(u32, @truncate(memory.items.len - 1));
+
     emulator.run();
 
     std.log.info("Done. State:", .{});
