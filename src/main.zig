@@ -9,11 +9,16 @@ pub fn main() anyerror!void {
 
     var memory: ArrayList(u8) = .empty;
     defer memory.deinit(allocator);
-    try memory.appendSlice(allocator, &[12]u8{
-        0x13, 0x05, 0x60, 0x00, // addi a0,x0,6 (li a0,6)
-        0x93, 0x05, 0x40, 0x00, // addi a1,x0,4 (li a1,4)
-        0x33, 0x05, 0xb5, 0x00, // add a0,a0,a1
-    });
+
+    const file_path = "examples/fib.bin"; // Update this path
+
+    const file_contents = try std.fs.cwd().readFileAlloc(allocator, file_path, std.math.maxInt(usize));
+    defer allocator.free(file_contents);
+
+    try memory.appendSlice(allocator, file_contents);
+
+    try memory.ensureTotalCapacity(allocator, 100 * 1024 * 1024);
+    memory.expandToCapacity();
 
     var emulator = zrvemu.Emulator.init(memory);
 
